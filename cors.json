@@ -1,0 +1,12 @@
+[
+  {
+    "origin": [
+      "http://localhost:8000",
+      "http://127.0.0.1:8000",
+      "https://ligabem.onrender.com"
+    ],
+    "method": ["GET", "POST", "PUT", "DELETE"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Authorization"]
+  }
+]
