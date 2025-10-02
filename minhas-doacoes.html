@@ -5,6 +5,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Minhas Doações - LigaBem</title>
   <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .card-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      transition: transform 0.2s ease-in-out;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+    }
+    .card-actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .btn-danger {
+      background: #e63946;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-secondary {
+      background: #457b9d;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -12,95 +55,81 @@
     <a href="dashboard.html" class="btn-voltar">⬅ Voltar ao Painel</a>
   </header>
 
-  <main id="minhas-container" class="card-container">
+  <main id="minhas-doacoes" class="card-container">
     <p>Carregando suas doações...</p>
   </main>
 
   <script type="module">
-    import { auth } from "./assets/js/firebase-config.js";
     import { listarMinhasDoacoes, excluirDoacao, editarDoacao } from "./assets/js/db.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { auth } from "./assets/js/firebase-config.js";
 
-    const container = document.getElementById("minhas-container");
+    const container = document.getElementById("minhas-doacoes");
 
-    // Escuta se o usuário está logado
-    onAuthStateChanged(auth, async (user) => {
+    async function carregarMinhasDoacoes() {
+      const user = auth.currentUser;
       if (!user) {
         container.innerHTML = "<p>⚠ Você precisa estar logado para ver suas doações.</p>";
         return;
       }
-      carregarMinhasDoacoes();
-    });
 
-    async function carregarMinhasDoacoes() {
-      try {
-        const doacoes = await listarMinhasDoacoes();
-        container.innerHTML = "";
+      const doacoes = await listarMinhasDoacoes();
+      container.innerHTML = "";
 
-        if (doacoes.length === 0) {
-          container.innerHTML = "<p>Você ainda não cadastrou nenhuma doação.</p>";
-          return;
-        }
-
-        doacoes.forEach((d) => {
-          const card = document.createElement("div");
-          card.classList.add("card");
-
-          card.innerHTML = `
-            <h3>${d.titulo}</h3>
-            <p>${d.descricao}</p>
-            <p><strong>Local:</strong> ${d.local}</p>
-            <p><strong>Status:</strong> ${d.status}</p>
-            <button class="btn-edit" data-id="${d.id}">✏ Editar</button>
-            <button class="btn-delete" data-id="${d.id}">🗑 Excluir</button>
-          `;
-
-          container.appendChild(card);
-        });
-
-        // Excluir
-        document.querySelectorAll(".btn-delete").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            if (confirm("Tem certeza que deseja excluir esta doação?")) {
-              try {
-                await excluirDoacao(btn.dataset.id);
-                alert("🗑️ Doação excluída com sucesso!");
-                carregarMinhasDoacoes();
-              } catch (err) {
-                alert("❌ Erro ao excluir: " + err.message);
-              }
-            }
-          });
-        });
-
-        // Editar
-        document.querySelectorAll(".btn-edit").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            const novoTitulo = prompt("Novo título:", "");
-            const novaDescricao = prompt("Nova descrição:", "");
-            const novoLocal = prompt("Novo local de retirada:", "");
-
-            if (novoTitulo && novaDescricao && novoLocal) {
-              try {
-                await editarDoacao(btn.dataset.id, {
-                  titulo: novoTitulo,
-                  descricao: novaDescricao,
-                  local: novoLocal
-                });
-                alert("✅ Doação atualizada!");
-                carregarMinhasDoacoes();
-              } catch (err) {
-                alert("❌ Erro ao editar: " + err.message);
-              }
-            }
-          });
-        });
-
-      } catch (err) {
-        console.error("❌ Erro ao carregar minhas doações:", err);
-        container.innerHTML = "<p>Erro ao carregar suas doações.</p>";
+      if (doacoes.length === 0) {
+        container.innerHTML = "<p>Você ainda não cadastrou nenhuma doação.</p>";
+        return;
       }
+
+      doacoes.forEach((d) => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+
+        card.innerHTML = `
+          ${d.fotoURL ? `<img src="${d.fotoURL}" alt="Foto da doação" class="card-img">` : ""}
+          <h3>${d.titulo}</h3>
+          <p>${d.descricao}</p>
+          <p><strong>Retirada:</strong> ${d.pontoRetirada || "A combinar"}</p>
+          <div class="card-actions">
+            <button class="btn-secondary editar" data-id="${d.id}">Editar</button>
+            <button class="btn-danger excluir" data-id="${d.id}">Excluir</button>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      // Eventos Editar e Excluir
+      document.querySelectorAll(".excluir").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (confirm("🗑️ Tem certeza que deseja excluir esta doação?")) {
+            try {
+              await excluirDoacao(btn.dataset.id);
+              alert("✅ Doação excluída com sucesso!");
+              carregarMinhasDoacoes();
+            } catch (err) {
+              alert("❌ Erro ao excluir doação: " + err.message);
+            }
+          }
+        });
+      });
+
+      document.querySelectorAll(".editar").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const novoTitulo = prompt("Novo título:");
+          if (!novoTitulo) return;
+
+          try {
+            await editarDoacao(btn.dataset.id, { titulo: novoTitulo });
+            alert("✅ Doação atualizada!");
+            carregarMinhasDoacoes();
+          } catch (err) {
+            alert("❌ Erro ao editar doação: " + err.message);
+          }
+        });
+      });
     }
+
+    carregarMinhasDoacoes();
   </script>
 </body>
 </html>

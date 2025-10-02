@@ -42,16 +42,18 @@
 
   <script type="module">
     import { cadastrarDoacao } from "../assets/js/db.js";
-    import { auth } from "../assets/js/firebase-config.js";
+    import { auth, storage } from "../assets/js/firebase-config.js";
+    import { ref, uploadBytes, getDownloadURL }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const form = document.getElementById("doacaoForm");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const titulo = document.getElementById("titulo").value;
-      const descricao = document.getElementById("descricao").value;
-      const pontoRetirada = document.getElementById("pontoRetirada").value;
+      const titulo = document.getElementById("titulo").value.trim();
+      const descricao = document.getElementById("descricao").value.trim();
+      const pontoRetirada = document.getElementById("pontoRetirada").value.trim();
       const fotoFile = document.getElementById("foto").files[0];
 
       const user = auth.currentUser;
@@ -60,15 +62,28 @@
         return;
       }
 
+      let fotoURL = null;
+
       try {
-        await cadastrarDoacao(
-          { titulo, descricao, local: pontoRetirada },
-          fotoFile
-        );
+        // 🔹 Faz upload da foto se existir
+        if (fotoFile) {
+          const storageRef = ref(storage, `doacoes/${user.uid}/${Date.now()}_${fotoFile.name}`);
+          await uploadBytes(storageRef, fotoFile);
+          fotoURL = await getDownloadURL(storageRef);
+        }
+
+        // 🔹 Salva no Firestore
+        await cadastrarDoacao({
+          titulo,
+          descricao,
+          pontoRetirada,
+          fotoURL
+        });
 
         alert("✅ Doação cadastrada com sucesso!");
         window.location.href = "lista.html";
       } catch (err) {
+        console.error("Erro ao cadastrar doação:", err);
         alert("❌ Erro ao cadastrar doação: " + err.message);
       }
     });
