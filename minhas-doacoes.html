@@ -62,17 +62,11 @@
   <script type="module">
     import { listarMinhasDoacoes, excluirDoacao, editarDoacao } from "./assets/js/db.js";
     import { auth } from "./assets/js/firebase-config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const container = document.getElementById("minhas-doacoes");
 
-    async function carregarMinhasDoacoes() {
-      const user = auth.currentUser;
-      if (!user) {
-        container.innerHTML = "<p>⚠ Você precisa estar logado para ver suas doações.</p>";
-        return;
-      }
-
-      const doacoes = await listarMinhasDoacoes();
+    function renderizarDoacoes(doacoes) {
       container.innerHTML = "";
 
       if (doacoes.length === 0) {
@@ -105,7 +99,7 @@
             try {
               await excluirDoacao(btn.dataset.id);
               alert("✅ Doação excluída com sucesso!");
-              carregarMinhasDoacoes();
+              location.reload();
             } catch (err) {
               alert("❌ Erro ao excluir doação: " + err.message);
             }
@@ -121,7 +115,7 @@
           try {
             await editarDoacao(btn.dataset.id, { titulo: novoTitulo });
             alert("✅ Doação atualizada!");
-            carregarMinhasDoacoes();
+            location.reload();
           } catch (err) {
             alert("❌ Erro ao editar doação: " + err.message);
           }
@@ -129,7 +123,21 @@
       });
     }
 
-    carregarMinhasDoacoes();
+    // 🔹 Só carrega as doações depois do Firebase confirmar login
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        container.innerHTML = "<p>⚠ Você precisa estar logado para ver suas doações.</p>";
+        return;
+      }
+
+      try {
+        const doacoes = await listarMinhasDoacoes();
+        renderizarDoacoes(doacoes);
+      } catch (err) {
+        container.innerHTML = "<p>❌ Erro ao carregar suas doações.</p>";
+        console.error(err);
+      }
+    });
   </script>
 </body>
 </html>
