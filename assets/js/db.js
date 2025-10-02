@@ -1,5 +1,5 @@
 // db.js
-import { db, auth } from "./firebase-config.js";
+import { db, auth, storage } from "./firebase-config.js";
 import {
   collection,
   addDoc,
@@ -11,15 +11,32 @@ import {
   doc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
 
 // ===== Cadastrar nova doação =====
-export async function cadastrarDoacao(doacao) {
+export async function cadastrarDoacao(doacao, fotoFile = null) {
   try {
     const user = auth.currentUser;
     if (!user) throw new Error("Usuário não autenticado.");
 
+    let fotoUrl = null;
+
+    // 🔹 Se tiver imagem, faz upload no Storage
+    if (fotoFile) {
+      const storageRef = ref(storage, `doacoes/${user.uid}/${Date.now()}_${fotoFile.name}`);
+      await uploadBytes(storageRef, fotoFile);
+      fotoUrl = await getDownloadURL(storageRef);
+    }
+
+    // 🔹 Salva no Firestore
     const docRef = await addDoc(collection(db, "doacoes"), {
       ...doacao,
+      fotoUrl,
       status: "disponivel",
       criadoEm: new Date().toISOString(),
       userId: user.uid

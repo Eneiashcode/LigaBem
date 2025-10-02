@@ -35,7 +35,13 @@
         const card = document.createElement("div");
         card.classList.add("card");
 
+        // Monta imagem se existir
+        const fotoHtml = d.fotoUrl
+          ? `<img src="${d.fotoUrl}" alt="Foto da doação" class="doacao-img">`
+          : "";
+
         card.innerHTML = `
+          ${fotoHtml}
           <h3>${d.titulo}</h3>
           <p>${d.descricao}</p>
           <p><strong>Retirada:</strong> ${d.local}</p>

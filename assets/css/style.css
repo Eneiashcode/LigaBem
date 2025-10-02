@@ -427,3 +427,11 @@ button {
 .btn-primary:hover {
   background: #27ae60;
 }
+
+.doacao-img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}

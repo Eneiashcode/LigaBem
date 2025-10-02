@@ -42,8 +42,7 @@
 
   <script type="module">
     import { cadastrarDoacao } from "../assets/js/db.js";
-    import { auth, storage } from "../assets/js/firebase-config.js";
-    import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+    import { auth } from "../assets/js/firebase-config.js";
 
     const form = document.getElementById("doacaoForm");
 
@@ -61,22 +60,11 @@
         return;
       }
 
-      let fotoURL = null;
-
       try {
-        if (fotoFile) {
-          const storageRef = ref(storage, `doacoes/${Date.now()}_${fotoFile.name}`);
-          await uploadBytes(storageRef, fotoFile);
-          fotoURL = await getDownloadURL(storageRef);
-        }
-
-        await cadastrarDoacao({
-          titulo,
-          descricao,
-          pontoRetirada,
-          doadorId: user.uid,
-          fotoURL
-        });
+        await cadastrarDoacao(
+          { titulo, descricao, local: pontoRetirada },
+          fotoFile
+        );
 
         alert("✅ Doação cadastrada com sucesso!");
         window.location.href = "lista.html";
