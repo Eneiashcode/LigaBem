@@ -1,0 +1,322 @@
+/* ===== Reset básico ===== */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f9f9f9;
+  color: #333;
+}
+
+/* ===== Login ===== */
+.login-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  text-align: center;
+}
+.logo {
+  width: 80px;
+  margin-bottom: 15px;
+}
+.login-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+.cadastro-link {
+  margin-top: 15px;
+}
+
+/* ===== Dashboard ===== */
+.dash-container {
+  padding: 40px;
+  text-align: center;
+}
+.sub {
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Botões principais */
+.btn-primary {
+  background: #00C2A8;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 15px auto;
+  display: block;
+  width: 80%;
+  max-width: 280px;
+  transition: background 0.3s, transform 0.2s;
+}
+.btn-primary:hover {
+  background: #00927d;
+  transform: translateY(-3px);
+}
+
+.btn-secundario {
+  background: #6C63FF;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 15px auto;
+  display: block;
+  width: 80%;
+  max-width: 280px;
+  transition: background 0.3s, transform 0.2s;
+}
+.btn-secundario:hover {
+  background: #5148c9;
+  transform: translateY(-3px);
+}
+
+/* ===== Lista de ofertas ===== */
+.list-container {
+  padding: 20px;
+  max-width: 700px;
+  margin: auto;
+}
+.card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+}
+.card h2 {
+  color: #6C63FF;
+  margin-bottom: 8px;
+  font-size: 1.4rem;
+}
+.card p {
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #444;
+}
+.ponto-seguro {
+  font-size: 0.95rem;
+  margin: 10px 0;
+  color: #007B5F;
+  font-weight: bold;
+}
+.btn-destaque {
+  background: #FFD166;
+  color: #333;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+.btn-destaque:hover {
+  background: #e6bb4f;
+  transform: translateY(-3px);
+}
+.btn-sair {
+  background: #ff5c5c;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 20px auto 0;
+  display: block;
+  width: 80%;
+  max-width: 250px;
+  transition: background 0.3s, transform 0.2s;
+}
+.btn-sair:hover {
+  background: #d94a4a;
+  transform: translateY(-3px);
+}
+/* ===== Formulário ===== */
+.form-container {
+  max-width: 450px;
+  margin: 50px auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.form-card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-top: 20px;
+}
+
+.form-group {
+  text-align: left;
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 6px;
+  color: #444;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+.foto-item {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.acoes {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-editar {
+  background: #4cafef;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.btn-editar:hover {
+  background: #3b92cc;
+}
+
+.btn-sair {
+  background: #ff5c5c;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.btn-sair:hover {
+  background: #d94a4a;
+}
+/* Navbar */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 15px;
+  background: #6c63ff;
+  color: white;
+}
+
+.app-title {
+  margin-left: 15px;
+  font-size: 20px;
+}
+
+/* Botão hamburguer */
+.hamburger {
+  font-size: 26px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+/* Overlay escuro */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+  z-index: 900;
+}
+
+.overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Menu lateral (overlay) */
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -260px; /* escondido */
+  width: 220px;
+  height: 100%;
+  background: #fff;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+  padding: 60px 20px;
+  transition: left 0.3s ease;
+  z-index: 1000;
+}
+
+.side-menu.open {
+  left: 0; /* aparece */
+}
+
+.side-menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.side-menu li {
+  margin: 20px 0;
+}
+
+.side-menu a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  font-size: 16px;
+  display: block;
+}
+
+.side-menu a:hover {
+  color: #6c63ff;
+}
+
+/* Botão fechar */
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}

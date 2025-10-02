@@ -1,0 +1,31 @@
+# Ambiente virtual Python
+.venv/
+venv/
+env/
+
+# Arquivos temporários
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+
+# Configurações locais
+*.env
+.env.*
+
+# Cache de ferramentas
+.cache/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build / Distribuição
+dist/
+build/
+*.spec
+
+# Node / Frontend (se usar npm futuramente)
+node_modules/

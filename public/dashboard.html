@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LigaBem - Dashboard</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <!-- Topbar com menu -->
+  <header class="navbar">
+    <button id="menuBtn" class="hamburger">☰</button>
+    <h1 class="app-title">LigaBem 💜</h1>
+  </header>
+
+  <!-- Overlay escuro -->
+  <div id="overlay" class="overlay"></div>
+
+  <!-- Menu lateral (overlay) -->
+  <nav id="sideMenu" class="side-menu">
+    <button id="closeMenu" class="close-btn">✖</button>
+    <ul>
+      <li><a href="minhas-doacoes.html">📦 Minhas Doações</a></li>
+      <li><a href="#" id="btnLogout">🚪 Sair</a></li>
+    </ul>
+  </nav>
+
+  <!-- Conteúdo principal -->
+  <main class="dash-container">
+    <h2>Bem-vindo 👋</h2>
+    <p class="sub">Escolha como deseja participar:</p>
+
+    <button class="btn-primary" onclick="window.location.href='doar.html'">
+      Quero Doar
+    </button>
+
+    <button class="btn-secundario" onclick="window.location.href='lista.html'">
+      Ver Ofertas
+    </button>
+  </main>
+
+  <script type="module">
+    import { logoutUsuario } from "../assets/js/auth.js";
+
+    const menuBtn = document.getElementById("menuBtn");
+    const sideMenu = document.getElementById("sideMenu");
+    const overlay = document.getElementById("overlay");
+    const closeMenu = document.getElementById("closeMenu");
+
+    // Abrir menu
+    menuBtn.addEventListener("click", () => {
+      sideMenu.classList.add("open");
+      overlay.classList.add("show");
+    });
+
+    // Fechar menu
+    closeMenu.addEventListener("click", fecharMenu);
+    overlay.addEventListener("click", fecharMenu);
+
+    function fecharMenu() {
+      sideMenu.classList.remove("open");
+      overlay.classList.remove("show");
+    }
+
+    // Logout
+    document.getElementById("btnLogout").addEventListener("click", async () => {
+      try {
+        await logoutUsuario();
+        alert("✅ Você saiu da sua conta.");
+        window.location.href = "index.html";
+      } catch (err) {
+        alert("❌ Erro ao sair: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

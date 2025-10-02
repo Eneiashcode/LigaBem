@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LigaBem - Cadastro</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <div class="login-container">
+    <h1>Crie sua conta ✨</h1>
+
+    <!-- Formulário de Cadastro -->
+    <form id="cadastroForm">
+      <input type="text" id="nome" placeholder="Nome completo" required>
+      <input type="email" id="email" placeholder="E-mail" required>
+      <input type="password" id="senha" placeholder="Senha" required>
+      <button type="submit" class="btn-primary">Cadastrar</button>
+    </form>
+
+    <p class="cadastro-link">
+      Já tem conta?
+      <a href="index.html">Fazer login</a>
+    </p>
+  </div>
+
+  <!-- Script do Firebase Auth -->
+  <script type="module">
+    import { cadastrarUsuario } from "../assets/js/auth.js";
+
+    const form = document.getElementById("cadastroForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const nome = document.getElementById("nome").value;
+      const email = document.getElementById("email").value;
+      const senha = document.getElementById("senha").value;
+
+      try {
+        await cadastrarUsuario(email, senha);
+        alert("✅ Conta criada com sucesso!");
+        window.location.href = "dashboard.html";
+      } catch (err) {
+        alert("❌ Erro no cadastro: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

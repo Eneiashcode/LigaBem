@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LigaBem - Nova Doação</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <div class="form-container">
+    <h1>Nova Doação 💚</h1>
+    <p class="sub">Preencha os campos abaixo para cadastrar sua doação</p>
+
+    <form id="doacaoForm" class="form-card">
+      <div class="form-group">
+        <label for="titulo">Título</label>
+        <input type="text" id="titulo" placeholder="Ex: Mala de viagem" required>
+      </div>
+
+      <div class="form-group">
+        <label for="descricao">Descrição</label>
+        <textarea id="descricao" placeholder="Breve descrição da doação" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="pontoRetirada">Ponto de retirada</label>
+        <input type="text" id="pontoRetirada" placeholder="Ex: Igreja São José" required>
+      </div>
+
+      <div class="form-group">
+        <label for="foto">Foto (opcional)</label>
+        <input type="file" id="foto" accept="image/*">
+      </div>
+
+      <button type="submit" class="btn-primary">Cadastrar Doação</button>
+    </form>
+
+    <p class="cadastro-link">
+      <a href="dashboard.html">⬅ Voltar ao Painel</a>
+    </p>
+  </div>
+
+  <script type="module">
+    import { cadastrarDoacao } from "../assets/js/db.js";
+    import { auth, storage } from "../assets/js/firebase-config.js";
+    import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+    const form = document.getElementById("doacaoForm");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const titulo = document.getElementById("titulo").value;
+      const descricao = document.getElementById("descricao").value;
+      const pontoRetirada = document.getElementById("pontoRetirada").value;
+      const fotoFile = document.getElementById("foto").files[0];
+
+      const user = auth.currentUser;
+      if (!user) {
+        alert("⚠ Você precisa estar logado para cadastrar uma doação.");
+        return;
+      }
+
+      let fotoURL = null;
+
+      try {
+        if (fotoFile) {
+          const storageRef = ref(storage, `doacoes/${Date.now()}_${fotoFile.name}`);
+          await uploadBytes(storageRef, fotoFile);
+          fotoURL = await getDownloadURL(storageRef);
+        }
+
+        await cadastrarDoacao({
+          titulo,
+          descricao,
+          pontoRetirada,
+          doadorId: user.uid,
+          fotoURL
+        });
+
+        alert("✅ Doação cadastrada com sucesso!");
+        window.location.href = "lista.html";
+      } catch (err) {
+        alert("❌ Erro ao cadastrar doação: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

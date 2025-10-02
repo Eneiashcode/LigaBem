@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LigaBem - Minhas Doações</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <div class="list-container">
+    <h1>Minhas Doações ✨</h1>
+    <p class="cadastro-link"><a href="dashboard.html">⬅ Voltar ao Painel</a></p>
+    <div id="minhasDoacoes"></div>
+  </div>
+
+  <script type="module">
+    import { listarMinhasDoacoes, atualizarDoacao, excluirDoacao } from "../assets/js/db.js";
+    import { auth } from "../assets/js/firebase-config.js";
+
+    async function carregarMinhasDoacoes() {
+      const container = document.getElementById("minhasDoacoes");
+      container.innerHTML = "<p>🔄 Carregando suas doações...</p>";
+
+      const user = auth.currentUser;
+      if (!user) {
+        container.innerHTML = "<p>⚠ Você precisa estar logado.</p>";
+        return;
+      }
+
+      const doacoes = await listarMinhasDoacoes(user.uid);
+      container.innerHTML = "";
+
+      if (doacoes.length === 0) {
+        container.innerHTML = "<p>⚠ Você ainda não cadastrou nenhuma doação.</p>";
+        return;
+      }
+
+      doacoes.forEach((d) => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+
+        card.innerHTML = `
+          ${d.fotoURL ? `<img src="${d.fotoURL}" alt="${d.titulo}" class="foto-item">` : ""}
+          <h2>${d.titulo}</h2>
+          <p>${d.descricao}</p>
+          <div class="ponto-seguro">📍 Retirada: ${d.pontoRetirada}</div>
+          <div class="acoes">
+            <button class="btn-editar" data-id="${d.id}">✏ Editar</button>
+            <button class="btn-sair" data-id="${d.id}">🗑 Excluir</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // Excluir
+      document.querySelectorAll(".btn-sair").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const id = e.target.getAttribute("data-id");
+          if (confirm("Tem certeza que deseja excluir esta doação?")) {
+            await excluirDoacao(id);
+            carregarMinhasDoacoes();
+          }
+        });
+      });
+
+      // Editar (título e descrição)
+      document.querySelectorAll(".btn-editar").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const id = e.target.getAttribute("data-id");
+          const novoTitulo = prompt("Novo título:");
+          const novaDescricao = prompt("Nova descrição:");
+          if (novoTitulo && novaDescricao) {
+            await atualizarDoacao(id, { titulo: novoTitulo, descricao: novaDescricao });
+            carregarMinhasDoacoes();
+          }
+        });
+      });
+    }
+
+    carregarMinhasDoacoes();
+  </script>
+</body>
+</html>

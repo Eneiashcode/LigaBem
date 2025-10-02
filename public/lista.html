@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LigaBem - Ofertas</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <div class="list-container">
+    <h1>Ofertas disponíveis 💜</h1>
+
+    <!-- Botão voltar -->
+    <p class="cadastro-link">
+      <a href="dashboard.html">⬅ Voltar ao Painel</a>
+    </p>
+
+    <div id="ofertas"></div>
+  </div>
+
+  <script type="module">
+    import { listarDoacoesDisponiveis, registrarMatch } from "../assets/js/db.js";
+    import { auth } from "../assets/js/firebase-config.js";
+
+    async function carregarOfertas() {
+      const container = document.getElementById("ofertas");
+      container.innerHTML = "<p>🔄 Carregando doações...</p>";
+
+      const doacoes = await listarDoacoesDisponiveis();
+      container.innerHTML = "";
+
+      if (doacoes.length === 0) {
+        container.innerHTML = "<p>⚠ Nenhuma doação disponível no momento.</p>";
+        return;
+      }
+
+      doacoes.forEach((d) => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+
+        card.innerHTML = `
+          ${d.fotoURL ? `<img src="${d.fotoURL}" alt="${d.titulo}" class="foto-item">` : ""}
+          <h2>${d.titulo}</h2>
+          <p>${d.descricao}</p>
+          <div class="ponto-seguro">📍 Retirada: ${d.pontoRetirada}</div>
+          <button class="btn-destaque" data-id="${d.id}">Agarrar esta oferta</button>
+        `;
+
+        container.appendChild(card);
+      });
+
+      // evento nos botões
+      document.querySelectorAll(".btn-destaque").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const doacaoId = e.target.getAttribute("data-id");
+          const user = auth.currentUser;
+
+          if (!user) {
+            alert("⚠ Você precisa estar logado para agarrar uma oferta.");
+            return;
+          }
+
+          try {
+            await registrarMatch(doacaoId, user.uid);
+            alert("✅ Interesse registrado com sucesso!");
+            carregarOfertas();
+          } catch (err) {
+            alert("❌ Erro ao registrar interesse: " + err.message);
+          }
+        });
+      });
+    }
+
+    carregarOfertas();
+  </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LigaBem - Login</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6C63FF">
+</head>
+<body>
+  <div class="login-container">
+    <img src="../assets/img/logo.png" alt="LigaBem" class="logo">
+
+    <h1>Bem-vindo ao LigaBem 💚</h1>
+    <p class="sub">Conectando solidariedade de forma simples e segura</p>
+
+    <!-- Formulário de Login -->
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="E-mail" required>
+      <input type="password" id="senha" placeholder="Senha" required>
+      <button type="submit" class="btn-primary">Entrar</button>
+    </form>
+
+    <p class="cadastro-link">
+      Ainda não tem conta?
+      <a href="cadastro.html">Cadastre-se</a>
+    </p>
+  </div>
+
+  <!-- Script do Firebase Auth -->
+  <script type="module">
+    import { loginUsuario } from "../assets/js/auth.js";
+
+    const form = document.getElementById("loginForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const senha = document.getElementById("senha").value;
+
+      try {
+        await loginUsuario(email, senha);
+        window.location.href = "dashboard.html"; // redireciona após login
+      } catch (err) {
+        alert("❌ Erro no login: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
