@@ -4,13 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LigaBem - Login</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <!-- Manifest + PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#6C63FF">
+
+  <!-- Ícone -->
+  <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
 </head>
 <body>
   <div class="login-container">
-    <img src="../assets/img/logo.png" alt="LigaBem" class="logo">
+    <img src="assets/img/logo.png" alt="LigaBem" class="logo">
 
     <h1>Bem-vindo ao LigaBem 💚</h1>
     <p class="sub">Conectando solidariedade de forma simples e segura</p>
@@ -28,9 +35,9 @@
     </p>
   </div>
 
-  <!-- Script do Firebase Auth -->
+  <!-- Scripts -->
   <script type="module">
-    import { loginUsuario } from "../assets/js/auth.js";
+    import { loginUsuario } from "./assets/js/auth.js";
 
     const form = document.getElementById("loginForm");
     form.addEventListener("submit", async (e) => {
@@ -45,6 +52,15 @@
         alert("❌ Erro no login: " + err.message);
       }
     });
+  </script>
+
+  <!-- Registro do Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(() => console.log("✅ Service Worker registrado"))
+        .catch(err => console.error("❌ Erro ao registrar Service Worker:", err));
+    }
   </script>
 </body>
 </html>

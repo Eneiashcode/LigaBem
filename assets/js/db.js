@@ -1,4 +1,5 @@
-import { db } from "./firebase-config.js";
+// db.js
+import { db, auth } from "./firebase-config.js";
 import {
   collection,
   addDoc,
@@ -11,15 +12,20 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 
-// ===== Criar Doação =====
+// ===== Cadastrar nova doação =====
 export async function cadastrarDoacao(doacao) {
   try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Usuário não autenticado.");
+
     const docRef = await addDoc(collection(db, "doacoes"), {
       ...doacao,
       status: "disponivel",
-      criadoEm: new Date().toISOString()
+      criadoEm: new Date().toISOString(),
+      userId: user.uid
     });
-    console.log("✅ Doação cadastrada com ID:", docRef.id);
+
+    console.log("✅ Doação cadastrada:", docRef.id);
     return docRef.id;
   } catch (e) {
     console.error("❌ Erro ao cadastrar doação:", e);
@@ -28,56 +34,37 @@ export async function cadastrarDoacao(doacao) {
 }
 
 
-// ===== Listar Doações Disponíveis =====
+// ===== Listar doações disponíveis (para todos os usuários) =====
 export async function listarDoacoesDisponiveis() {
   try {
     const q = query(collection(db, "doacoes"), where("status", "==", "disponivel"));
     const snapshot = await getDocs(q);
 
     let doacoes = [];
-    snapshot.forEach((docItem) => {
-      doacoes.push({ id: docItem.id, ...docItem.data() });
+    snapshot.forEach((docSnap) => {
+      doacoes.push({ id: docSnap.id, ...docSnap.data() });
     });
 
     return doacoes;
   } catch (e) {
-    console.error("❌ Erro ao listar doações:", e);
+    console.error("❌ Erro ao listar doações disponíveis:", e);
     return [];
   }
 }
 
 
-// ===== Registrar Interesse (Match) =====
-export async function registrarMatch(doacaoId, tomadorId) {
+// ===== Listar doações do usuário logado =====
+export async function listarMinhasDoacoes() {
   try {
-    const docRef = await addDoc(collection(db, "matches"), {
-      doacaoId,
-      tomadorId,
-      status: "pendente",
-      manifestadoEm: new Date().toISOString()
-    });
+    const user = auth.currentUser;
+    if (!user) throw new Error("Usuário não autenticado.");
 
-    const doacaoRef = doc(db, "doacoes", doacaoId);
-    await updateDoc(doacaoRef, { status: "agarrada" });
-
-    console.log("✅ Match registrado:", docRef.id);
-    return docRef.id;
-  } catch (e) {
-    console.error("❌ Erro ao registrar match:", e);
-    throw e;
-  }
-}
-
-
-// ===== Listar Doações de um Usuário =====
-export async function listarMinhasDoacoes(userId) {
-  try {
-    const q = query(collection(db, "doacoes"), where("doadorId", "==", userId));
+    const q = query(collection(db, "doacoes"), where("userId", "==", user.uid));
     const snapshot = await getDocs(q);
 
     let doacoes = [];
-    snapshot.forEach((docItem) => {
-      doacoes.push({ id: docItem.id, ...docItem.data() });
+    snapshot.forEach((docSnap) => {
+      doacoes.push({ id: docSnap.id, ...docSnap.data() });
     });
 
     return doacoes;
@@ -88,32 +75,54 @@ export async function listarMinhasDoacoes(userId) {
 }
 
 
-// ===== Atualizar Doação =====
-export async function atualizarDoacao(doacaoId, novosDados) {
+// ===== Editar doação =====
+export async function editarDoacao(id, novosDados) {
   try {
-    const doacaoRef = doc(db, "doacoes", doacaoId);
-    await updateDoc(doacaoRef, {
+    const ref = doc(db, "doacoes", id);
+    await updateDoc(ref, {
       ...novosDados,
       atualizadoEm: new Date().toISOString()
     });
-    console.log("✅ Doação atualizada:", doacaoId);
-    return true;
+    console.log("✅ Doação atualizada:", id);
   } catch (e) {
-    console.error("❌ Erro ao atualizar doação:", e);
+    console.error("❌ Erro ao editar doação:", e);
     throw e;
   }
 }
 
 
-// ===== Excluir Doação =====
-export async function excluirDoacao(doacaoId) {
+// ===== Excluir doação =====
+export async function excluirDoacao(id) {
   try {
-    const doacaoRef = doc(db, "doacoes", doacaoId);
-    await deleteDoc(doacaoRef);
-    console.log("🗑️ Doação excluída:", doacaoId);
-    return true;
+    const ref = doc(db, "doacoes", id);
+    await deleteDoc(ref);
+    console.log("🗑️ Doação excluída:", id);
   } catch (e) {
     console.error("❌ Erro ao excluir doação:", e);
+    throw e;
+  }
+}
+
+
+// ===== Registrar interesse (match) em uma doação =====
+export async function registrarMatch(doacaoId, tomadorId) {
+  try {
+    // Cria o registro de match
+    const docRef = await addDoc(collection(db, "matches"), {
+      doacaoId,
+      tomadorId,
+      status: "pendente",
+      manifestadoEm: new Date().toISOString()
+    });
+
+    // Atualiza a doação para "agarrada"
+    const doacaoRef = doc(db, "doacoes", doacaoId);
+    await updateDoc(doacaoRef, { status: "agarrada" });
+
+    console.log("✅ Match registrado:", docRef.id);
+    return docRef.id;
+  } catch (e) {
+    console.error("❌ Erro ao registrar match:", e);
     throw e;
   }
 }

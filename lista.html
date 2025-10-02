@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ofertas Disponíveis - LigaBem</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Ofertas disponíveis 💜</h1>
+    <a href="dashboard.html" class="btn-voltar">⬅ Voltar ao Painel</a>
+  </header>
+
+  <main id="lista-container" class="card-container">
+    <p>Carregando ofertas...</p>
+  </main>
+
+  <script type="module">
+    import { listarDoacoesDisponiveis, registrarMatch } from "./assets/js/db.js";
+    import { auth } from "./assets/js/firebase-config.js";
+
+    const listaContainer = document.getElementById("lista-container");
+
+    async function carregarOfertas() {
+      const doacoes = await listarDoacoesDisponiveis();
+      listaContainer.innerHTML = "";
+
+      if (doacoes.length === 0) {
+        listaContainer.innerHTML = "<p>Não há ofertas disponíveis no momento.</p>";
+        return;
+      }
+
+      doacoes.forEach((d) => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+
+        card.innerHTML = `
+          <h3>${d.titulo}</h3>
+          <p>${d.descricao}</p>
+          <p><strong>Retirada:</strong> ${d.local}</p>
+          <button class="btn-primary" data-id="${d.id}">Agarrar esta oferta</button>
+        `;
+
+        listaContainer.appendChild(card);
+      });
+
+      // Evento para "Agarrar"
+      document.querySelectorAll("button[data-id]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const user = auth.currentUser;
+          if (!user) {
+            alert("Você precisa estar logado para agarrar uma oferta.");
+            return;
+          }
+
+          try {
+            await registrarMatch(btn.dataset.id, user.uid);
+            alert("✅ Interesse registrado com sucesso!");
+            carregarOfertas(); // Atualiza a lista
+          } catch (err) {
+            alert("❌ Erro ao agarrar oferta: " + err.message);
+          }
+        });
+      });
+    }
+
+    carregarOfertas();
+  </script>
+</body>
+</html>

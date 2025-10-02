@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meus Matches - LigaBem</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Meus Matches 🤝</h1>
+    <a href="dashboard.html" class="btn-voltar">⬅ Voltar ao Painel</a>
+  </header>
+
+  <main id="match-container" class="card-container">
+    <p>Carregando matches...</p>
+  </main>
+
+  <script type="module">
+    import { db, auth } from "./assets/js/firebase-config.js";
+    import { getDocs, query, collection, where, doc, updateDoc }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const container = document.getElementById("match-container");
+
+    async function carregarMatches() {
+      const user = auth.currentUser;
+      if (!user) {
+        container.innerHTML = "<p>⚠ Você precisa estar logado.</p>";
+        return;
+      }
+
+      try {
+        // Pega doações do usuário logado
+        const q = query(collection(db, "doacoes"), where("userId", "==", user.uid));
+        const snapshot = await getDocs(q);
+
+        let minhasDoacoes = [];
+        snapshot.forEach((docSnap) => {
+          minhasDoacoes.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        if (minhasDoacoes.length === 0) {
+          container.innerHTML = "<p>Você ainda não cadastrou doações.</p>";
+          return;
+        }
+
+        container.innerHTML = "";
+
+        for (const doacao of minhasDoacoes) {
+          // Busca matches relacionados a essa doação
+          const qMatch = query(collection(db, "matches"), where("doacaoId", "==", doacao.id));
+          const snapMatch = await getDocs(qMatch);
+
+          if (snapMatch.empty) continue;
+
+          snapMatch.forEach((matchDoc) => {
+            const match = { id: matchDoc.id, ...matchDoc.data() };
+
+            const card = document.createElement("div");
+            card.classList.add("card");
+
+            card.innerHTML = `
+              <h3>${doacao.titulo}</h3>
+              <p>${doacao.descricao}</p>
+              <p><strong>Status:</strong> ${match.status}</p>
+              <div class="acoes">
+                <button class="btn-approve" data-id="${match.id}">✅ Aprovar</button>
+                <button class="btn-reject" data-id="${match.id}">❌ Rejeitar</button>
+              </div>
+            `;
+
+            container.appendChild(card);
+          });
+        }
+
+        // Aprovar match
+        document.querySelectorAll(".btn-approve").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const ref = doc(db, "matches", btn.dataset.id);
+            await updateDoc(ref, { status: "aprovado" });
+            alert("✅ Match aprovado!");
+            carregarMatches();
+          });
+        });
+
+        // Rejeitar match
+        document.querySelectorAll(".btn-reject").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const ref = doc(db, "matches", btn.dataset.id);
+            await updateDoc(ref, { status: "rejeitado" });
+            alert("❌ Match rejeitado!");
+            carregarMatches();
+          });
+        });
+
+      } catch (err) {
+        console.error("❌ Erro ao carregar matches:", err);
+        container.innerHTML = "<p>Erro ao carregar matches.</p>";
+      }
+    }
+
+    carregarMatches();
+  </script>
+</body>
+</html>

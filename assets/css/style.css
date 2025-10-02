@@ -320,3 +320,110 @@ body {
   font-size: 22px;
   cursor: pointer;
 }
+
+/* ======== Layout geral ======== */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5f6fa;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+header {
+  background: #6C63FF;
+  color: #fff;
+  padding: 1rem;
+  text-align: center;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.btn-voltar {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 6px 14px;
+  background: #fff;
+  color: #6C63FF;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background 0.2s ease-in-out;
+}
+.btn-voltar:hover {
+  background: #eee;
+}
+
+/* ======== Cards ======== */
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+}
+
+.card h3 {
+  color: #6C63FF;
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.card p {
+  margin: 4px 0;
+  font-size: 0.95rem;
+}
+
+/* ======== Botões ======== */
+button {
+  border: none;
+  padding: 8px 14px;
+  margin: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Botão Editar */
+.btn-edit {
+  background: #ffd93b;
+  color: #000;
+}
+.btn-edit:hover {
+  background: #f4c531;
+}
+
+/* Botão Excluir */
+.btn-delete {
+  background: #ff6b6b;
+  color: #fff;
+}
+.btn-delete:hover {
+  background: #e63946;
+}
+
+/* Botão padrão (cadastrar, agarrar etc.) */
+.btn-primary {
+  background: #2ecc71;
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #27ae60;
+}
