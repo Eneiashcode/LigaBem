@@ -1,75 +1,158 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LigaBem - Dashboard</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    .notificacoes {
+      margin-top: 30px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .notificacao {
+      border-bottom: 1px solid #eee;
+      padding: 12px 0;
+    }
+    .notificacao:last-child {
+      border-bottom: none;
+    }
+    .notificacao p {
+      margin: 5px 0;
+    }
+    .tomador-info {
+      margin-top: 8px;
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .contato-item {
+      margin: 3px 0;
+    }
+    .status {
+      font-weight: bold;
+      color: #555;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+  </style>
 </head>
+
 <body>
-  <!-- Topbar com menu -->
+  <!-- Topbar -->
   <header class="navbar">
     <button id="menuBtn" class="hamburger">☰</button>
     <h1 class="app-title">LigaBem 💜</h1>
   </header>
 
-  <!-- Overlay escuro -->
+  <!-- Overlay -->
   <div id="overlay" class="overlay"></div>
 
-  <!-- Menu lateral (overlay) -->
+  <!-- Menu lateral -->
   <nav id="sideMenu" class="side-menu">
     <button id="closeMenu" class="close-btn">✖</button>
     <ul>
       <li><a href="minhas-doacoes.html">📦 Minhas Doações</a></li>
+      <li><a href="meus-interesses.html">⭐ Meus Interesses</a></li>
       <li><a href="#" id="btnLogout">🚪 Sair</a></li>
     </ul>
   </nav>
 
-  <!-- Conteúdo principal -->
+  <!-- Conteúdo -->
   <main class="dash-container">
     <h2>Bem-vindo 👋</h2>
     <p class="sub">Escolha como deseja participar:</p>
 
-    <button class="btn-primary" onclick="window.location.href='doar.html'">
-      Quero Doar
-    </button>
+    <button class="btn-primary" onclick="window.location.href='doar.html'">Quero Doar</button>
+    <button class="btn-secundario" onclick="window.location.href='lista.html'">Ver Ofertas</button>
 
-    <button class="btn-secundario" onclick="window.location.href='lista.html'">
-      Ver Ofertas
-    </button>
+    <!-- Notificações -->
+    <section class="notificacoes">
+      <h3>🔔 Minhas Notificações</h3>
+      <div id="listaNotificacoes">
+        <p>Carregando notificações...</p>
+      </div>
+    </section>
   </main>
 
   <script type="module">
     import { logoutUsuario } from "../assets/js/auth.js";
+    import { auth } from "../assets/js/firebase-config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { listarNotificacoesComTomador } from "../assets/js/notificacoes.js";
 
+    const listaNotificacoes = document.getElementById("listaNotificacoes");
+
+    // --- MENU ---
     const menuBtn = document.getElementById("menuBtn");
     const sideMenu = document.getElementById("sideMenu");
     const overlay = document.getElementById("overlay");
     const closeMenu = document.getElementById("closeMenu");
 
-    // Abrir menu
     menuBtn.addEventListener("click", () => {
       sideMenu.classList.add("open");
       overlay.classList.add("show");
     });
-
-    // Fechar menu
     closeMenu.addEventListener("click", fecharMenu);
     overlay.addEventListener("click", fecharMenu);
-
     function fecharMenu() {
       sideMenu.classList.remove("open");
       overlay.classList.remove("show");
     }
 
-    // Logout
+    // --- LOGOUT ---
     document.getElementById("btnLogout").addEventListener("click", async () => {
-      try {
-        await logoutUsuario();
-        alert("✅ Você saiu da sua conta.");
-        window.location.href = "index.html";
-      } catch (err) {
-        alert("❌ Erro ao sair: " + err.message);
+      await logoutUsuario();
+      alert("✅ Você saiu da sua conta.");
+      window.location.href = "index.html";
+    });
+
+    // --- LISTAR NOTIFICAÇÕES ---
+    async function carregarNotificacoes(user) {
+      const notificacoes = await listarNotificacoesComTomador(user.uid);
+      listaNotificacoes.innerHTML = "";
+
+      if (!notificacoes.length) {
+        listaNotificacoes.innerHTML = "<p>Você não possui notificações no momento.</p>";
+        return;
+      }
+
+      notificacoes.forEach((notif) => {
+        const div = document.createElement("div");
+        div.classList.add("notificacao");
+
+        div.innerHTML = `
+          <p>${notif.mensagem}</p>
+          ${
+            notif.tomador
+              ? `<div class="tomador-info">
+                  <div class="contato-item">👤 <strong>${notif.tomador.nome}</strong></div>
+                  <div class="contato-item">📞 ${notif.tomador.telefone}</div>
+                  <div class="contato-item">💬 WhatsApp: ${
+                    notif.tomador.aceitaWhatsApp ? "Sim" : "Não"
+                  }</div>
+                  <div class="contato-item">📲 Ligação: ${
+                    notif.tomador.aceitaLigacao ? "Sim" : "Não"
+                  }</div>
+                </div>`
+              : `<div class="tomador-info">Sem informações do interessado.</div>`
+          }
+        `;
+
+        listaNotificacoes.appendChild(div);
+      });
+    }
+
+    // --- VERIFICAR LOGIN ---
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        carregarNotificacoes(user);
+      } else {
+        listaNotificacoes.innerHTML = "<p>⚠ Faça login para ver suas notificações.</p>";
       }
     });
   </script>

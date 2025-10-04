@@ -58,7 +58,7 @@
         card.classList.add("card");
 
         card.innerHTML = `
-          ${d.fotoURL ? `<img src="${d.fotoURL}" alt="Foto da doação" class="card-img">` : ""}
+          ${d.fotoUrl ? `<img src="${d.fotoUrl}" alt="Foto da doação" class="card-img">` : ""}
           <h3>${d.titulo}</h3>
           <p>${d.descricao}</p>
           <p><strong>Retirada:</strong> ${d.pontoRetirada || "A combinar"}</p>
@@ -66,11 +66,9 @@
         `;
 
         listaContainer.appendChild(card);
-      });
 
-      // Evento para "Agarrar"
-      document.querySelectorAll("button[data-id]").forEach((btn) => {
-        btn.addEventListener("click", async () => {
+        // Adiciona evento de "Agarrar" para cada card
+        card.querySelector("button").addEventListener("click", async () => {
           const user = auth.currentUser;
           if (!user) {
             alert("⚠ Você precisa estar logado para agarrar uma oferta.");
@@ -78,7 +76,12 @@
           }
 
           try {
-            await registrarMatch(btn.dataset.id, user.uid);
+            await registrarMatch(
+              d.id,       // ID da doação
+              user.uid,   // usuário que está agarrando
+              d.titulo,   // título da doação
+              d.userId    // dono da doação
+            );
             alert("✅ Interesse registrado com sucesso!");
             carregarOfertas(); // Atualiza a lista
           } catch (err) {

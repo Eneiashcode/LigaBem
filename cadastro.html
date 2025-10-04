@@ -15,6 +15,17 @@
       <input type="text" id="nome" placeholder="Nome completo" required>
       <input type="email" id="email" placeholder="E-mail" required>
       <input type="password" id="senha" placeholder="Senha" required>
+      <input type="tel" id="telefone" placeholder="Telefone (opcional)">
+
+      <label>
+        <input type="checkbox" id="contatoWhatsApp">
+        Aceito receber contato por WhatsApp
+      </label>
+      <label>
+        <input type="checkbox" id="contatoLigacao">
+        Aceito receber contato por ligação
+      </label>
+
       <button type="submit" class="btn-primary">Cadastrar</button>
     </form>
 
@@ -26,7 +37,9 @@
 
   <!-- Script do Firebase Auth -->
   <script type="module">
-    import { cadastrarUsuario } from "../assets/js/auth.js";
+    import { auth, db } from "../assets/js/firebase-config.js";
+    import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const form = document.getElementById("cadastroForm");
     form.addEventListener("submit", async (e) => {
@@ -35,9 +48,24 @@
       const nome = document.getElementById("nome").value;
       const email = document.getElementById("email").value;
       const senha = document.getElementById("senha").value;
+      const telefone = document.getElementById("telefone").value || "";
+      const contatoWhatsApp = document.getElementById("contatoWhatsApp").checked;
+      const contatoLigacao = document.getElementById("contatoLigacao").checked;
 
       try {
-        await cadastrarUsuario(email, senha);
+        // 🔹 Cria usuário no Firebase Auth
+        const cred = await createUserWithEmailAndPassword(auth, email, senha);
+
+        // 🔹 Salva dados extras no Firestore (coleção "usuarios")
+        await setDoc(doc(db, "usuarios", cred.user.uid), {
+          nome,
+          email,
+          telefone,
+          aceitaContatoWhatsApp: contatoWhatsApp,
+          aceitaContatoLigacao: contatoLigacao,
+          criadoEm: new Date().toISOString()
+        });
+
         alert("✅ Conta criada com sucesso!");
         window.location.href = "dashboard.html";
       } catch (err) {

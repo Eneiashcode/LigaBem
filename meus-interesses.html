@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LigaBem - Meus Interesses</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .interesse {
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .status {
+      font-weight: bold;
+      margin-top: 8px;
+      color: #555;
+    }
+    .contato {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #333;
+    }
+    .contato a {
+      color: #007b5f;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .contato a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⭐ Meus Interesses</h1>
+    <a href="dashboard.html" class="btn-voltar">⬅ Voltar</a>
+  </header>
+
+  <main id="lista-interesses" class="card-container">
+    <p>Carregando...</p>
+  </main>
+
+  <script type="module">
+    import { auth, db } from "./assets/js/firebase-config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const container = document.getElementById("lista-interesses");
+
+    async function carregarInteresses(user) {
+      try {
+        const q = query(collection(db, "matches"), where("tomadorId", "==", user.uid));
+        const snapshot = await getDocs(q);
+
+        container.innerHTML = "";
+        if (snapshot.empty) {
+          container.innerHTML = "<p>Você ainda não manifestou interesse em nenhuma doação.</p>";
+          return;
+        }
+
+        for (const docSnap of snapshot.docs) {
+          const match = docSnap.data();
+          const doacaoRef = doc(db, "doacoes", match.doacaoId);
+          const doacaoSnap = await getDoc(doacaoRef);
+          const doacao = doacaoSnap.exists() ? doacaoSnap.data() : {};
+
+          // Busca a notificação para pegar o contato do doador
+          const notificacoesQuery = query(
+            collection(db, "notificacoes"),
+            where("doacaoId", "==", match.doacaoId),
+            where("tomadorId", "==", user.uid)
+          );
+          const notificacoesSnap = await getDocs(notificacoesQuery);
+          let contatoHTML = "";
+          notificacoesSnap.forEach((notifDoc) => {
+            const n = notifDoc.data();
+            if (n.tomadorTelefone) {
+              contatoHTML = `
+                <div class="contato">
+                  ${n.aceitaContatoWhatsApp ? `📱 <a href="https://wa.me/${n.tomadorTelefone}" target="_blank">Conversar no WhatsApp</a><br>` : ""}
+                  ${n.aceitaContatoLigacao ? `📞 Telefone: ${n.tomadorTelefone}` : ""}
+                </div>
+              `;
+            }
+          });
+
+          const div = document.createElement("div");
+          div.classList.add("interesse");
+          div.innerHTML = `
+            <h3>${doacao.titulo || "Doação"}</h3>
+            ${doacao.fotoURL ? `<img src="${doacao.fotoURL}" alt="Foto da doação" style="width:100%; border-radius:8px; margin-top:10px;">` : ""}
+            <p>${doacao.descricao || ""}</p>
+            <p><strong>Status:</strong> <span class="status">${match.status}</span></p>
+            ${contatoHTML}
+          `;
+          container.appendChild(div);
+        }
+      } catch (e) {
+        console.error("❌ Erro ao carregar interesses:", e);
+        container.innerHTML = "<p>Erro ao carregar dados.</p>";
+      }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        carregarInteresses(user);
+      } else {
+        container.innerHTML = "<p>⚠ Faça login para ver seus interesses.</p>";
+      }
+    });
+  </script>
+</body>
+</html>
