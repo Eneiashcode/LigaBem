@@ -2,21 +2,25 @@
   "name": "LigaBem",
   "short_name": "LigaBem",
   "description": "Conectando solidariedade na sua comunidade.",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#00C2A8",
+  "background_color": "#FFFFFF",
   "theme_color": "#6C63FF",
   "orientation": "portrait",
+  "id": "/",
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
